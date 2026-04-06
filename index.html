@@ -1,0 +1,666 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Matrícula Escolar - Validação de CPF</title>
+
+    <!-- ============================================ -->
+    <!-- ESTILOS CSS (APARÊNCIA DO FORMULÁRIO)       -->
+    <!-- ============================================ -->
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .container {
+            background-color: white;
+            border-radius: 20px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+            max-width: 500px;
+            width: 100%;
+            padding: 40px;
+        }
+
+        h1 {
+            text-align: center;
+            color: #333;
+            margin-bottom: 10px;
+            font-size: 2em;
+        }
+
+        .subtitle {
+            text-align: center;
+            color: #666;
+            margin-bottom: 30px;
+            font-size: 1.1em;
+        }
+
+        .form-group {
+            margin-bottom: 25px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            color: #555;
+            font-weight: 500;
+            font-size: 1.1em;
+        }
+
+        input {
+            width: 100%;
+            padding: 15px;
+            border: 2px solid #e1e1e1;
+            border-radius: 8px;
+            font-size: 18px;
+            transition: all 0.3s ease;
+            letter-spacing: 1px;
+        }
+
+        input:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
+        /* Estilos para validação de CPF */
+        input.valid {
+            border-color: #28a745;
+            background-color: #f0fff4;
+        }
+
+        input.invalid {
+            border-color: #dc3545;
+            background-color: #fff5f5;
+        }
+
+        .message {
+            font-size: 0.95em;
+            margin-top: 8px;
+            padding: 10px;
+            border-radius: 6px;
+            display: none;
+            font-weight: 500;
+        }
+
+        .message.valid {
+            display: block;
+            color: #155724;
+            background-color: #d4edda;
+            border: 1px solid #c3e6cb;
+        }
+
+        .message.invalid {
+            display: block;
+            color: #721c24;
+            background-color: #f8d7da;
+            border: 1px solid #f5c6cb;
+        }
+
+        button {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            font-size: 18px;
+            font-weight: 600;
+            border-radius: 8px;
+            cursor: pointer;
+            width: 100%;
+            transition: opacity 0.3s ease;
+            margin-top: 10px;
+        }
+
+        button:hover:not(:disabled) {
+            opacity: 0.9;
+            transform: translateY(-2px);
+        }
+
+        button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .status {
+            margin-top: 20px;
+            padding: 15px;
+            border-radius: 8px;
+            text-align: center;
+            font-weight: 500;
+            display: none;
+        }
+
+        .status.success {
+            display: block;
+            background-color: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+
+        .status.error {
+            display: block;
+            background-color: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+
+        .status.warning {
+            display: block;
+            background-color: #fff3cd;
+            color: #856404;
+            border: 1px solid #ffeeba;
+        }
+
+        .info {
+            text-align: center;
+            margin-top: 20px;
+            font-size: 0.9em;
+            color: #888;
+        }
+
+        /* Estilos para o Pop-up Modal */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0,0,0,0.5);
+            animation: fadeIn 0.3s ease;
+        }
+
+        .modal-content {
+            background-color: white;
+            margin: 15% auto;
+            padding: 0;
+            border-radius: 15px;
+            width: 90%;
+            max-width: 400px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.3);
+            animation: slideIn 0.3s ease;
+            overflow: hidden;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        @keyframes slideIn {
+            from {
+                transform: translateY(-50px);
+                opacity: 0;
+            }
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+
+        .modal-header {
+            background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+            padding: 20px;
+            text-align: center;
+            position: relative;
+        }
+
+        .modal-header h2 {
+            color: white;
+            margin: 0;
+            font-size: 1.5em;
+        }
+
+        .modal-body {
+            padding: 30px;
+            text-align: center;
+        }
+
+        .check-icon {
+            font-size: 70px;
+            color: #28a745;
+            margin-bottom: 20px;
+            animation: bounce 0.5s ease;
+        }
+
+        @keyframes bounce {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.2); }
+        }
+
+        .cpf-destacado {
+            font-size: 28px;
+            font-weight: bold;
+            color: #28a745;
+            background: #f0fff4;
+            padding: 15px;
+            border-radius: 10px;
+            margin: 15px 0;
+            letter-spacing: 2px;
+            font-family: monospace;
+            border: 2px dashed #28a745;
+        }
+
+        .mensagem-sucesso {
+            color: #28a745;
+            font-size: 18px;
+            font-weight: 600;
+            margin: 10px 0;
+        }
+
+        .data-hora {
+            color: #666;
+            font-size: 12px;
+            margin-top: 15px;
+            padding-top: 15px;
+            border-top: 1px solid #eee;
+        }
+
+        .modal-footer {
+            padding: 20px;
+            text-align: center;
+            border-top: 1px solid #eee;
+        }
+
+        .btn-modal {
+            background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+            color: white;
+            border: none;
+            padding: 12px 30px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: 600;
+            transition: transform 0.2s;
+        }
+
+        .btn-modal:hover {
+            transform: scale(1.05);
+        }
+
+        .modal-close {
+            position: absolute;
+            right: 15px;
+            top: 15px;
+            background: none;
+            border: none;
+            font-size: 28px;
+            cursor: pointer;
+            color: white;
+            width: auto;
+            padding: 0;
+            margin: 0;
+        }
+
+        .modal-close:hover {
+            opacity: 0.8;
+            transform: none;
+        }
+
+        /* Loading spinner */
+        .loading-spinner {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid rgba(255,255,255,0.3);
+            border-radius: 50%;
+            border-top-color: white;
+            animation: spin 1s ease-in-out infinite;
+            margin-right: 8px;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- ============================================ -->
+        <!-- ESTRUTURA HTML DO FORMULÁRIO                 -->
+        <!-- ============================================ -->
+        <h1>🔢 Validação de CPF</h1>
+        <p class="subtitle">Digite o CPF para validação e armazenamento</p>
+
+        <form id="cpfForm">
+            <div class="form-group">
+                <label for="cpf">CPF do aluno *</label>
+                <input type="text" 
+                       id="cpf" 
+                       name="cpf" 
+                       placeholder="000.000.000-00" 
+                       maxlength="14" 
+                       autocomplete="off"
+                       required>
+                <div id="cpfMessage" class="message"></div>
+            </div>
+
+            <button type="submit" id="submitBtn" disabled>Armazenar CPF</button>
+        </form>
+
+        <div id="statusMessage" class="status"></div>
+        <div class="info">✅ Apenas números são aceitos • Validação em tempo real • Os dados são salvos no Google Sheets</div>
+    </div>
+
+    <!-- Pop-up Modal -->
+    <div id="modal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button class="modal-close" onclick="fecharModal()">&times;</button>
+                <h2>✅ CPF Armazenado!</h2>
+            </div>
+            <div class="modal-body">
+                <div class="check-icon">✓</div>
+                <div class="mensagem-sucesso">CPF Armazenado com Sucesso!</div>
+                <div class="cpf-destacado" id="cpfArmazenado"></div>
+                <div class="data-hora" id="dataHoraArmazenamento"></div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn-modal" onclick="fecharModal()">OK</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ============================================ -->
+    <!-- SCRIPT PRINCIPAL (JAVASCRIPT)                -->
+    <!-- ============================================ -->
+    <script>
+        (function() {
+            // ============================================
+            // ELEMENTOS DO DOM
+            // ============================================
+            const cpfInput = document.getElementById('cpf');
+            const cpfMessage = document.getElementById('cpfMessage');
+            const submitBtn = document.getElementById('submitBtn');
+            const statusMessage = document.getElementById('statusMessage');
+            const modal = document.getElementById('modal');
+            const cpfArmazenadoSpan = document.getElementById('cpfArmazenado');
+            const dataHoraSpan = document.getElementById('dataHoraArmazenamento');
+            let cpfValido = false;
+
+            // ============================================
+            // CONFIGURAÇÃO DO GOOGLE SHEETS
+            // ============================================
+            // URL do Google Apps Script (Você precisa criar e colocar sua URL aqui)
+            // Siga as instruções no final do código para configurar
+            const URL_GOOGLE_SHEETS = "https://script.google.com/macros/s/AKfycbz-V0GEO3GoLVXfksyrUFLZDCawXM5F9u2eT0ci5DulMkytWB6o4kEE1bTR1muk3yrYUw/exec";
+            // ============================================
+            // FUNÇÕES DE MÁSCARA E VALIDAÇÃO DE CPF
+            // ============================================
+            
+            // Aplica a máscara de CPF: 000.000.000-00
+            function aplicarMascaraCPF(valor) {
+                // Remove tudo que não for número
+                let numeros = valor.replace(/\D/g, '');
+                
+                // Limita a 11 números
+                numeros = numeros.substring(0, 11);
+                
+                // Aplica a máscara progressivamente
+                if (numeros.length > 3) {
+                    numeros = numeros.replace(/^(\d{3})(\d)/, '$1.$2');
+                }
+                if (numeros.length > 7) {
+                    numeros = numeros.replace(/^(\d{3})\.(\d{3})(\d)/, '$1.$2.$3');
+                }
+                if (numeros.length > 11) {
+                    numeros = numeros.replace(/^(\d{3})\.(\d{3})\.(\d{3})(\d)/, '$1.$2.$3-$4');
+                }
+                
+                return numeros;
+            }
+
+            // Valida o CPF através do cálculo dos dígitos verificadores
+            function validarCPF(cpf) {
+                // Remove caracteres não numéricos
+                const cpfLimpo = cpf.replace(/\D/g, '');
+                
+                // Verifica se tem 11 dígitos
+                if (cpfLimpo.length !== 11) return false;
+                
+                // Verifica se todos os dígitos são iguais (CPF inválido)
+                if (/^(\d)\1+$/.test(cpfLimpo)) return false;
+                
+                // Validação do primeiro dígito verificador
+                let soma = 0;
+                for (let i = 0; i < 9; i++) {
+                    soma += parseInt(cpfLimpo.charAt(i)) * (10 - i);
+                }
+                let resto = (soma * 10) % 11;
+                if (resto === 10 || resto === 11) resto = 0;
+                if (resto !== parseInt(cpfLimpo.charAt(9))) return false;
+                
+                // Validação do segundo dígito verificador
+                soma = 0;
+                for (let i = 0; i < 10; i++) {
+                    soma += parseInt(cpfLimpo.charAt(i)) * (11 - i);
+                }
+                resto = (soma * 10) % 11;
+                if (resto === 10 || resto === 11) resto = 0;
+                if (resto !== parseInt(cpfLimpo.charAt(10))) return false;
+                
+                return true;
+            }
+
+            // ============================================
+            // FUNÇÃO PARA SALVAR NO GOOGLE SHEETS
+            // ============================================
+            async function salvarNoGoogleSheets(cpf) {
+                const dados = {
+                    timestamp: new Date().toLocaleString('pt-BR'),
+                    cpf: cpf,
+                    dataCompleta: new Date().toISOString()
+                };
+                
+                console.log('📤 Enviando para o Google Sheets:', dados);
+                console.log('🔗 URL:', URL_GOOGLE_SHEETS);
+                
+                try {
+                    // Tenta enviar via POST
+                    const resposta = await fetch(URL_GOOGLE_SHEETS, {
+                        method: 'POST',
+                        mode: 'no-cors', // Importante para evitar problemas de CORS
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify(dados)
+                    });
+                    
+                    console.log('✅ Enviado com sucesso!');
+                    return { success: true };
+                    
+                } catch (error) {
+                    console.error('❌ Erro ao salvar:', error);
+                    throw new Error('Não foi possível salvar no Google Sheets. Verifique sua conexão e a URL configurada.');
+                }
+            }
+
+            // ============================================
+            // FUNÇÃO PARA EXIBIR POP-UP
+            // ============================================
+            function exibirPopup(cpf) {
+                const agora = new Date();
+                const dataHora = agora.toLocaleDateString('pt-BR') + ' às ' + agora.toLocaleTimeString('pt-BR');
+                
+                cpfArmazenadoSpan.textContent = cpf;
+                dataHoraSpan.textContent = `Armazenado em: ${dataHora}`;
+                modal.style.display = 'block';
+            }
+
+            // ============================================
+            // FUNÇÃO PARA FECHAR POP-UP
+            // ============================================
+            window.fecharModal = function() {
+                modal.style.display = 'none';
+            }
+
+            // ============================================
+            // EVENTO DE DIGITAÇÃO (VALIDAÇÃO EM TEMPO REAL)
+            // ============================================
+            cpfInput.addEventListener('input', function(e) {
+                let valor = e.target.value;
+                
+                // Remove classes e mensagens anteriores
+                this.classList.remove('valid', 'invalid');
+                cpfMessage.className = 'message';
+                cpfMessage.style.display = 'none';
+                
+                // Verifica se contém caracteres não numéricos
+                if (/[^\d.-]/.test(valor)) {
+                    cpfMessage.className = 'message invalid';
+                    cpfMessage.textContent = '❌ Insira somente números';
+                    cpfMessage.style.display = 'block';
+                    this.classList.add('invalid');
+                    cpfValido = false;
+                    submitBtn.disabled = true;
+                    return;
+                }
+                
+                // Aplica a máscara
+                let valorMascarado = aplicarMascaraCPF(valor);
+                e.target.value = valorMascarado;
+                
+                // Valida o CPF se tiver 14 caracteres (com a máscara)
+                if (valorMascarado.length === 14) {
+                    if (validarCPF(valorMascarado)) {
+                        cpfMessage.className = 'message valid';
+                        cpfMessage.textContent = '✅ CPF válido';
+                        cpfMessage.style.display = 'block';
+                        this.classList.add('valid');
+                        cpfValido = true;
+                        submitBtn.disabled = false;
+                    } else {
+                        cpfMessage.className = 'message invalid';
+                        cpfMessage.textContent = '❌ CPF inválido';
+                        cpfMessage.style.display = 'block';
+                        this.classList.add('invalid');
+                        cpfValido = false;
+                        submitBtn.disabled = true;
+                    }
+                } else {
+                    cpfValido = false;
+                    submitBtn.disabled = true;
+                }
+            });
+
+            // ============================================
+            // PREVENIR COLAGEM DE CARACTERES INVÁLIDOS
+            // ============================================
+            cpfInput.addEventListener('paste', function(e) {
+                e.preventDefault();
+                const textoColado = (e.clipboardData || window.clipboardData).getData('text');
+                const apenasNumeros = textoColado.replace(/\D/g, '').substring(0, 11);
+                this.value = aplicarMascaraCPF(apenasNumeros);
+                
+                // Dispara o evento input para validar
+                this.dispatchEvent(new Event('input'));
+            });
+
+            // ============================================
+            // EVENTO DE SUBMISSÃO DO FORMULÁRIO
+            // ============================================
+            document.getElementById('cpfForm').addEventListener('submit', async function(e) {
+                e.preventDefault();
+                
+                // Esconde mensagem anterior
+                statusMessage.style.display = 'none';
+                statusMessage.className = 'status';
+                
+                // Verifica se o CPF é válido
+                if (!cpfValido) {
+                    statusMessage.className = 'status error';
+                    statusMessage.textContent = '❌ CPF inválido. Verifique o número digitado.';
+                    statusMessage.style.display = 'block';
+                    return;
+                }
+                
+                // Pega o CPF formatado e sem formatação
+                const cpfFormatado = cpfInput.value;
+                const cpfLimpo = cpfFormatado.replace(/\D/g, '');
+                
+                // Desabilita o botão durante o envio
+                submitBtn.disabled = true;
+                submitBtn.innerHTML = '<span class="loading-spinner"></span> Salvando...';
+                
+                try {
+                    // SALVA NO GOOGLE SHEETS
+                    await salvarNoGoogleSheets(cpfFormatado);
+                    
+                    // EXIBE O POP-UP COM O CPF VALIDADO
+                    exibirPopup(cpfFormatado);
+                    
+                    // Mensagem de sucesso temporária
+                    statusMessage.className = 'status success';
+                    statusMessage.innerHTML = `✅ CPF ${cpfFormatado} salvo no Google Sheets com sucesso!`;
+                    statusMessage.style.display = 'block';
+                    
+                    // Limpa o campo
+                    cpfInput.value = '';
+                    cpfInput.classList.remove('valid');
+                    cpfMessage.style.display = 'none';
+                    cpfValido = false;
+                    submitBtn.disabled = true;
+                    
+                    // Esconde a mensagem após 5 segundos
+                    setTimeout(() => {
+                        if (statusMessage.style.display === 'block') {
+                            statusMessage.style.display = 'none';
+                        }
+                    }, 5000);
+                    
+                } catch (error) {
+                    console.error('❌ Erro detalhado:', error);
+                    
+                    statusMessage.className = 'status error';
+                    statusMessage.innerHTML = `❌ Erro ao salvar: ${error.message}<br><small>Verifique se a URL do Google Sheets está correta.</small>`;
+                    statusMessage.style.display = 'block';
+                    
+                    // Reabilita o botão se o CPF ainda for válido
+                    submitBtn.disabled = !cpfValido;
+                } finally {
+                    submitBtn.innerHTML = 'Armazenar CPF';
+                }
+            });
+
+            // ============================================
+            // FECHAR MODAL AO CLICAR FORA
+            // ============================================
+            window.addEventListener('click', function(e) {
+                if (e.target === modal) {
+                    fecharModal();
+                }
+            });
+
+            // ============================================
+            // FECHAR MODAL COM TECLA ESC
+            // ============================================
+            document.addEventListener('keydown', function(e) {
+                if (e.key === 'Escape' && modal.style.display === 'block') {
+                    fecharModal();
+                }
+            });
+
+            // ============================================
+            // CPFS PARA TESTE
+            // ============================================
+            console.log('📝 CPFs para teste:', '529.982.247-25, 123.456.789-09, 111.444.777-35');
+            console.log('💾 Os CPFs serão salvos no Google Sheets configurado');
+            
+        })();
+    </script>
+</body>
+</html>
